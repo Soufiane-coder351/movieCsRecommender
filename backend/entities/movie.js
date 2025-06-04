@@ -15,7 +15,9 @@ const Movie = new typeorm.EntitySchema({
       type: String,
     },
     genre: {
-        type: String
+        type: 'simple-json'
+        //genre est une liste d'ids de genres, 
+        //dont on stocke un tableau de relation hors de la base de données
     },
     description: {
         type: String
