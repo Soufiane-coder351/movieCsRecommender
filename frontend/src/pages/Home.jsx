@@ -1,16 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { movies } from "../data/movies";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import GenreFilter from "../components/GenreFilter";
 import MovieCard from "../components/MovieCard";
 import HeroSection from "../components/HeroSection";
 
+import useFetchMovies from "../scripts/useFetchMovies";
+
 const Home = () => {
   const [search, setSearch] = useState("");
   const [selectedGenre, setSelectedGenre] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
-  const moviesPerPage = 8;
+  const moviesPerPage = 10;
+
+  const { movies, error } = useFetchMovies();
+  // get the movies using axios
+  
 
   const filteredMovies = movies.filter((movie) => {
     const matchesSearch = movie.title.toLowerCase().includes(search.toLowerCase());
@@ -54,12 +59,10 @@ const Home = () => {
         </div>
 
         {/* Movies Grid */}
-        <div
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6"
-          id="movie-grid"
-        >
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(220px,1fr))] gap-6" id="movie-grid">
+
           {currentMovies.map((movie) => (
-            <MovieCard key={movie.title} movie={movie} />
+            <MovieCard key={movie.id} movie={movie} />
           ))}
         </div>
 
