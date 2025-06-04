@@ -1,9 +1,13 @@
-import typeorm from "typeorm";
+/**
+ * @typedef {import('typeorm').MigrationInterface} MigrationInterface
+ */
 
-const { MigrationInterface, QueryRunner } = typeorm;
-
-export default class AddUserTable1684835167994 {
-    name = 'AddUserTable1684835167994'
+/**
+ * @class
+ * @implements {MigrationInterface}
+ */
+export default class User1749027666264 {
+    name = 'User1749027666264'
 
     async up(queryRunner) {
         await queryRunner.query(`
