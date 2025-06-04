@@ -9,7 +9,6 @@ function useFetchMovies() {
       .get('http://localhost:8000/movies/')
       .then((response) => { 
         // Do something if call succeeded
-        console.log(response.data.movies);
         setMovies(response.data.movies);
       })
       .catch((e) => {
