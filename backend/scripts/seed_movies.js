@@ -1,5 +1,6 @@
 import { appDataSource } from '../datasource.js';
 import Movie from '../entities/movie.js';
+import Genre from '../entities/genre.js';
 import axios from 'axios';
 
 const options = {
@@ -14,8 +15,17 @@ const options = {
 
 var movies = [];
 
+async function getAllGenre() {
+  const genreRepository = appDataSource.getRepository(Genre);
+  const genres = await genreRepository.find({ select: ['id', 'name'] });
+  const genre_dico = {};
+  for (const genre of genres) {
+    genre_dico[genre.id] = genre.name;
+  }
+  return genre_dico;
+}
 
-async function get_movies () {
+async function get_movies(genre_dico) {
     try {
         const res = await axios.request(options);
         const result = res.data;
@@ -25,7 +35,7 @@ async function get_movies () {
                 id : result['results'][i]['id'],
                 title : result['results'][i]['title'],
                 date : result['results'][i]['release_date'],
-                genre: result['results'][i]['genre_ids'],
+                genre: result['results'][i]['genre_ids'].map(genreId => genre_dico[genreId] || 'Unknown'),
                 description: result['results'][i]['overview'],
                 poster_path : 'https://image.tmdb.org/t/p/w500' + result['results'][i]['poster_path']
             });
@@ -36,7 +46,6 @@ async function get_movies () {
 }
 
 async function seed() {
-  await appDataSource.initialize();
   const movieRepository = appDataSource.getRepository(Movie);
 
   for (const movie of movies) {
@@ -47,13 +56,14 @@ async function seed() {
       console.error(`Erreur pour ${movie.title} :`, err.message);
     }
   }
+}
 
-  await appDataSource.destroy();
-};
-
-seed();async function main() {
-    await get_movies();
+async function main() {
+    await appDataSource.initialize();
+    const genre_dico = await getAllGenre();
+    await get_movies(genre_dico);
     await seed();
+    await appDataSource.destroy();
 }
 
 main();
