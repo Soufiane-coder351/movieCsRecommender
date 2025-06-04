@@ -6,6 +6,8 @@
   "scripts": {
     "dev": "dotenv -- nodemon --experimental-modules ./server.js",
     "start": "dotenv -- node --experimental-modules ./server.js",
+    "seedmovies": "node scripts/seed_movies.js",
+    "seedgenres": "node scripts/seed_genres.js",
     "lint": "eslint . --fix",
     "migration:generate": "dotenv -- typeorm --dataSource='./datasource.js' migration:generate --outputJs --pretty migrations/$npm_config_name",
     "postmigration:generate": "bash ./postmigration.sh",

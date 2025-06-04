@@ -48,7 +48,7 @@ async function seed() {
   await appDataSource.destroy();
 };
 
-seed();async function main() {
+async function main() {
     await get_genres();
     await seed();
 }
