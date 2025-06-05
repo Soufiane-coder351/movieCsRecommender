@@ -1,14 +1,28 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import heroBg from "../assets/hero_background.png";
 
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleSignup = (e) => {
+  const handleSignup = async (e) => {
     e.preventDefault();
-    console.log("Signing up with:", name, email);
-    // Add your signup logic here
+    setError("");
+    try {
+      // Send signup request to backend
+      const res = await axios.post("http://localhost:8000/users/signup", { name, email });
+      const userId = res.data.id;
+      // Store userId in localStorage
+      localStorage.setItem("userId", userId);
+      // Redirect to home page
+      navigate("/");
+    } catch (err) {
+      setError("Signup failed. Please try again.");
+    }
   };
 
   return (
@@ -39,6 +53,7 @@ const Signup = () => {
               placeholder="you@example.com"
             />
           </div>
+          {error && <div className="text-red-400">{error}</div>}
           <button
             type="submit"
             className="w-full py-3 bg-orange-500 rounded hover:bg-orange-600 transition"
