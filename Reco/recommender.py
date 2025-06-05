@@ -1,3 +1,5 @@
+import ast
+
 from fastapi import FastAPI
 from typing import List
 import pandas as pd
@@ -77,16 +79,19 @@ async def get_recommendations(user_id: int, n_recommendations: int = 10, recent_
     def genres_ids_to_names(genre_ids):
         if not genre_ids:
             return ""
+        if isinstance(genre_ids, str):
+            try:
+                genre_ids = ast.literal_eval(genre_ids)
+            except Exception:
+                return ""
         return " ".join([genre_map.get(gid, "") for gid in genre_ids if gid in genre_map])
-
+    
     movies_df["genre_names"] = movies_df["genre"].apply(genres_ids_to_names)
-    print(movies_df["genre_names"].head())
     movies_df["combined_text"] = (
         movies_df["title"].fillna("") + " " +
         movies_df.get("description", pd.Series([""] * len(movies_df))).fillna("") + " " +
         movies_df.get("genre_names", pd.Series([""] * len(movies_df))).fillna("")
     )
-
 
     user_ratings_df = pd.DataFrame(user_ratings)
     user_ratings_df = user_ratings_df[user_ratings_df["ratingValue"].isin([-1, 1])].reset_index(drop=True)
