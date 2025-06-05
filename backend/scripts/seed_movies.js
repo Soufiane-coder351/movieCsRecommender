@@ -62,48 +62,53 @@ async function seed() {
 
   for (const movie of movies) {
     const is_in_db = await movieRepository.findOneBy({ id: movie.id });
-    const has_keywords = is_in_db && is_in_db.keywords && is_in_db.keywords.trim() !== '';
 
-    if (has_keywords===null){
+    
 
-      //appel a l'api pour modifier keywords
+    //appel a l'api pour modifier keywords
+    try {
+      const res = await axios.request(get_keyword_options(movie.id));
+      const result = res.data;
+      const n = result['keywords'].length;
+      for (let i = 0; i < n; i++) {
+        movie.keywords += result['keywords'][i]['name'] + ' ';
+      }
+    } catch (err) {
+      console.error(`Erreur lors de la récupération des keywords pour ${movie.title} :`, err.message);
+    }
+
+
+    if (is_in_db){
+      
       try {
-        const res = await axios.request(get_keyword_options(movie.id));
-        const result = res.data;
-        const n = result['keywords'].length;
-        for (let i = 0; i < n; i++) {
-          movie.keywords += result['keywords'][i]['name'] + ' ';
-        }
+        await movieRepository.update(
+          { id: movie.id },
+          {
+            title: movie.title,
+            date: movie.date,
+            genre: movie.genre,
+            description: movie.description,
+            keywords: movie.keywords,
+            poster_path: movie.poster_path
+          }
+        );
+        console.log(`Mise à jour pour : ${movie.title}`);
       } catch (err) {
-        console.error(`Erreur lors de la récupération des keywords pour ${movie.title} :`, err.message);
-      }
-
-
-      if (is_in_db){
-        
-        try {
-          await movieRepository.update({ id: movie.id }, { keywords: movie.keywords });
-          console.log(`Mise à jour keywords pour : ${movie.title}`);
-        } catch (err) {
-          console.error(`Erreur de mise à jour pour ${movie.title} :`, err.message);
-        }
-      }
-      else {
-        try {
-          await movieRepository.insert(movie);
-          console.log(`Ajouté : ${movie.title}`);
-        } catch (err) {
-          console.error(`Erreur pour ${movie.title} :`, err.message);
-        }
+        console.error(`Erreur de mise à jour pour ${movie.title} :`, err.message);
       }
     }
     else {
-      console.log(`Déjà présent et à jour : ${movie.title}`)
+      try {
+        await movieRepository.insert(movie);
+        console.log(`Ajouté : ${movie.title}`);
+      } catch (err) {
+        console.error(`Erreur pour ${movie.title} :`, err.message);
+      }
     }
-    
-    
   }
+    
 }
+
 
 async function main() {
     await appDataSource.initialize();
