@@ -13,7 +13,7 @@ const Login = () => {
     setError("");
     try {
       // Send login request to backend
-      const res = await axios.post("http://localhost:8000/users/login", { email });
+      const res = await axios.post("http://localhost:3000/users/login", { email });
       const userId = res.data.id;
       // Store userId in localStorage
       localStorage.setItem("userId", userId);

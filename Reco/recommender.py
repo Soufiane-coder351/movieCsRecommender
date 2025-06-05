@@ -16,9 +16,19 @@ from read import (
     fetch_genres,
 )
 
-
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Or specify ["http://localhost:3000"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
 
 @app.get("/movies")
 async def get_movies():
@@ -90,8 +100,7 @@ async def get_recommendations(user_id: int, n_recommendations: int = 10, recent_
     movies_df["combined_text"] = (
         movies_df["title"].fillna("") + " " +
         movies_df.get("description", pd.Series([""] * len(movies_df))).fillna("") + " " +
-        movies_df.get("genre_names", pd.Series([""] * len(movies_df))).fillna("") + " " +
-        movies_df.get("keywords", pd.Series([""] * len(movies_df))).fillna("")
+        movies_df.get("genre_names", pd.Series([""] * len(movies_df))).fillna("")
     )
 
     user_ratings_df = pd.DataFrame(user_ratings)
@@ -124,9 +133,6 @@ async def get_recommendations(user_id: int, n_recommendations: int = 10, recent_
         .head(n_recommendations)
     )
 
-    return {
-        "recommendations": [
-            {"id": row["id"], "title": row["title"]}
-            for _, row in recommendations.iterrows()
-        ]
-    }
+    # return only a list of the recommended movie IDs
+    recom_ids = recommendations["id"].tolist()
+    return {"recommendations": recom_ids}

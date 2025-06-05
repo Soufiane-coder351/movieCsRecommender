@@ -14,7 +14,7 @@ const Signup = () => {
     setError("");
     try {
       // Send signup request to backend
-      const res = await axios.post("http://localhost:8000/users/signup", { name, email });
+      const res = await axios.post("http://localhost:3000/users/signup", { name, email });
       const userId = res.data.id;
       // Store userId in localStorage
       localStorage.setItem("userId", userId);
