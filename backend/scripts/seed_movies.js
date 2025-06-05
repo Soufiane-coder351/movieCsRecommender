@@ -35,7 +35,7 @@ async function get_movies(genre_dico) {
                 id : result['results'][i]['id'],
                 title : result['results'][i]['title'],
                 date : result['results'][i]['release_date'],
-                genre: result['results'][i]['genre_ids'].map(genreId => genre_dico[genreId] || 'Unknown'),
+                genre: result['results'][i]['genre_ids'],
                 description: result['results'][i]['overview'],
                 poster_path : 'https://image.tmdb.org/t/p/w500' + result['results'][i]['poster_path']
             });
