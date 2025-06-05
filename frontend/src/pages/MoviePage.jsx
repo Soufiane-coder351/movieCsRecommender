@@ -18,7 +18,7 @@ const MoviePage = () => {
   useEffect(() => {
     if (!userId || !id) return;
     axios
-      .get(`http://localhost:8000/ratings/${userId}/${id}`)
+      .get(`http://localhost:3000/ratings/${userId}/${id}`)
       .then((res) => {
         if (res.data.rating === 1) setUserReaction("like");
         else if (res.data.rating === -1) setUserReaction("dislike");
@@ -32,13 +32,13 @@ const MoviePage = () => {
     if (!userId) return;
     if (userReaction === "like") {
       // Remove like
-      await axios.delete("http://localhost:8000/ratings", {
+      await axios.delete("http://localhost:3000/ratings", {
         data: { userId: Number(userId), movieId: Number(id) },
       });
       setUserReaction(null);
     } else {
       // Like (and remove dislike if present)
-      await axios.post("http://localhost:8000/ratings", {
+      await axios.post("http://localhost:3000/ratings", {
         userId: Number(userId),
         movieId: Number(id),
         ratingValue: 1,
@@ -52,13 +52,13 @@ const MoviePage = () => {
     if (!userId) return;
     if (userReaction === "dislike") {
       // Remove dislike
-      await axios.delete("http://localhost:8000/ratings", {
+      await axios.delete("http://localhost:3000/ratings", {
         data: { userId: Number(userId), movieId: Number(id) },
       });
       setUserReaction(null);
     } else {
       // Dislike (and remove like if present)
-      await axios.post("http://localhost:8000/ratings", {
+      await axios.post("http://localhost:3000/ratings", {
         userId: Number(userId),
         movieId: Number(id),
         ratingValue: -1,

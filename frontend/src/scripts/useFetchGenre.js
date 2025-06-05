@@ -9,7 +9,7 @@ function useFetchGenre(id) {
   useEffect(() => {
     console.log('useFetchGenre called with id:', id);
     axios
-      .get(`http://localhost:8000/genres/${id}`)
+      .get(`http://localhost:3000/genres/${id}`)
       .then((response) => {
         
         console.log(response.data.name);

@@ -9,7 +9,7 @@ function useFetchMovie(id) {
   useEffect(() => {
     if (!id) return;
     axios
-      .get(`http://localhost:8000/movies/${id}`)
+      .get(`http://localhost:3000/movies/${id}`)
       .then((response) => {
         
         setMovie(response.data);

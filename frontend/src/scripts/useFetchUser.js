@@ -8,7 +8,7 @@ function useFetchUser(userId) {
   useEffect(() => {
     if (!userId) return;
     axios
-      .get(`http://localhost:8000/users/${userId}`)
+      .get(`http://localhost:3000/users/${userId}`)
       .then((res) => setUser(res.data.user))
       .catch((err) => setError(err));
   }, [userId]);

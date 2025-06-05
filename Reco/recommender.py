@@ -90,7 +90,8 @@ async def get_recommendations(user_id: int, n_recommendations: int = 10, recent_
     movies_df["combined_text"] = (
         movies_df["title"].fillna("") + " " +
         movies_df.get("description", pd.Series([""] * len(movies_df))).fillna("") + " " +
-        movies_df.get("genre_names", pd.Series([""] * len(movies_df))).fillna("")
+        movies_df.get("genre_names", pd.Series([""] * len(movies_df))).fillna("") + " " +
+        movies_df.get("keywords", pd.Series([""] * len(movies_df))).fillna("")
     )
 
     user_ratings_df = pd.DataFrame(user_ratings)

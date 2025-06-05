@@ -45,10 +45,10 @@ const ProfilePage = () => {
   // Fetch liked/disliked movies from backend
   useEffect(() => {
     if (!userId) return;
-    fetch(`http://localhost:8000/ratings/liked/${userId}`)
+    fetch(`http://localhost:3000/ratings/liked/${userId}`)
       .then(res => res.json())
       .then(data => setLikedMovies(data.movies || []));
-    fetch(`http://localhost:8000/ratings/disliked/${userId}`)
+    fetch(`http://localhost:3000/ratings/disliked/${userId}`)
       .then(res => res.json())
       .then(data => setDislikedMovies(data.movies || []));
   }, [userId]);
