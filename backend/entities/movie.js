@@ -22,6 +22,9 @@ const Movie = new typeorm.EntitySchema({
     description: {
         type: String
     },
+    keywords: {
+      type: String
+    },
     poster_path: {
       type: String,
     },
