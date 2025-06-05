@@ -1,19 +1,17 @@
 import typeorm from 'typeorm';
 
-const User = new typeorm.EntitySchema({
-  name: 'User',
+const Genre = new typeorm.EntitySchema({
+  name: 'Genre',
   columns: {
     id: {
       primary: true,
       type: Number,
       generated: true,
     },
-    email: {
+    name: {
       type: String,
-      unique: true,
     },
-    name: { type: String },
   },
 });
 
-export default User;
+export default Genre;

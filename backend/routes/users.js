@@ -13,44 +13,80 @@ router.get('/', function (req, res) {
     });
 });
 
-router.post('/new', function (req, res) {
+router.post('/signup', function (req, res) {
   const userRepository = appDataSource.getRepository(User);
-  const newUser = userRepository.create({
-    email: req.body.email,
-    firstname: req.body.firstname,
-    lastname: req.body.lastname,
+  const { name, email } = req.body;
+  
+  if (!name || !email) {
+    return res.status(400).json({ error: 'Name and email are required' });
+  }
+
+  const user = userRepository.create({
+    name: name,
+    email: email,
   });
 
-  userRepository
-    .save(newUser)
+  appDataSource
+    .getRepository(User)
+    .save(user)
     .then(function (savedUser) {
-      res.status(201).json({
-        message: 'User successfully created',
-        id: savedUser.id,
-      });
+      console.log('User saved:', savedUser);
+      res.status(201).json({ id: savedUser.id });
     })
     .catch(function (error) {
-      console.error(error);
-      if (error.code === '23505') {
-        res.status(400).json({
-          message: `User with email "${newUser.email}" already exists`,
-        });
-      } else {
-        res.status(500).json({ message: 'Error while creating the user' });
-      }
+      console.error('Error saving user:', error);
+      res.status(500).json({ error: 'Internal server error' });
     });
 });
 
-router.delete('/:userId', function (req, res) {
+router.post('/login', function (req, res) {
+  const userRepository = appDataSource.getRepository(User);
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ error: 'Email is required' });
+  }
+
+  userRepository
+    .findOneBy({ email: email })
+    .then(function (user) {
+      if (user) {
+        console.log('User found:', user);
+        res.status(200).json({ id: user.id, name: user.name });
+      } else {
+        console.log('User not found with email:', email);
+        res.status(404).json({ error: 'User not found' });
+      }
+    })
+    .catch(function (error) {
+      console.error('Error finding user:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    });
+}
+);
+
+router.get('/:userId', function (req, res) {
+  const userId = parseInt(req.params.userId, 10);
+
+  if (isNaN(userId)) {
+    return res.status(400).json({ error: 'Invalid user ID' });
+  }
+
   appDataSource
     .getRepository(User)
-    .delete({ id: req.params.userId })
-    .then(function () {
-      res.status(204).json({ message: 'User successfully deleted' });
+    .findOneBy({ id: userId })
+    .then(function (user) {
+      if (user) {
+        res.json({ user: user });
+      } else {
+        res.status(404).json({ error: 'User not found' });
+      }
     })
-    .catch(function () {
-      res.status(500).json({ message: 'Error while deleting the user' });
+    .catch(function (error) {
+      console.error('Error finding user:', error);
+      res.status(500).json({ error: 'Internal server error' });
     });
 });
+
 
 export default router;
