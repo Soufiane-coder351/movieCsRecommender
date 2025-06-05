@@ -11,6 +11,7 @@ from read import (
     fetch_user_ratings,
     fetch_average_rating,
     fetch_top_rated_movies,
+    fetch_genres,
 )
 
 
@@ -49,6 +50,10 @@ async def get_average_rating_route(movie_id: int):
     return {"error": f"No ratings found for movie id {movie_id}"}
 
 
+@app.get("/top_rated_movies")
+async def get_top_rated_movies(limit: int = 10):
+    movies = fetch_top_rated_movies(limit)
+    return {"top_rated_movies": movies}
 
 
 
@@ -59,17 +64,29 @@ async def get_recommendations(user_id: int, n_recommendations: int = 10, recent_
     if not movies:
         return {"recommendations": []}
 
-    user_ratings = fetch_user_ratings(user_id)
+    movies_df = pd.DataFrame(movies)  
 
-    movies_df = pd.DataFrame(movies)
+    user_ratings = fetch_user_ratings(user_id)
+    if not user_ratings:
+        return {"fromwhere":"came from fetch top rated movies","recommendations": fetch_top_rated_movies(n_recommendations)}
+
+
+    genre_rows = fetch_genres()  # <-- Utilise la fonction ici
+    genre_map = {row["id"]: row["name"] for row in genre_rows}
+
+    def genres_ids_to_names(genre_ids):
+        if not genre_ids:
+            return ""
+        return " ".join([genre_map.get(gid, "") for gid in genre_ids if gid in genre_map])
+
+    movies_df["genre_names"] = movies_df["genre"].apply(genres_ids_to_names)
+    print(movies_df["genre_names"].head())
     movies_df["combined_text"] = (
         movies_df["title"].fillna("") + " " +
         movies_df.get("description", pd.Series([""] * len(movies_df))).fillna("") + " " +
-        movies_df.get("genre", pd.Series([""] * len(movies_df))).fillna("")
+        movies_df.get("genre_names", pd.Series([""] * len(movies_df))).fillna("")
     )
 
-    if not user_ratings:
-        return {"fromwhere":"came from fetch top rated movies","recommendations": fetch_top_rated_movies(n_recommendations)}
 
     user_ratings_df = pd.DataFrame(user_ratings)
     user_ratings_df = user_ratings_df[user_ratings_df["ratingValue"].isin([-1, 1])].reset_index(drop=True)
