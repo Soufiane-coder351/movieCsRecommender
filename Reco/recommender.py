@@ -39,7 +39,14 @@ async def get_recommendations(
     user_ratings = read.get_user_ratings(user_id)
     if not user_ratings:
         # Si pas de notes, recommander les films les mieux notés globalement
-        cursor.execute("SELECT id FROM Movie ORDER BY rating DESC LIMIT ?", (n_recommendations,))
+        cursor.execute("""
+            SELECT Movie.id, AVG(Rating.ratingValue) as avg_rating
+             FROM Movie
+             JOIN Rating ON Movie.id = Rating.movieId
+            GROUP BY Movie.id
+            ORDER BY avg_rating DESC
+            LIMIT ?
+        """, (n_recommendations,))
         popular = [row["id"] for row in cursor.fetchall()]
         conn.close()
         return {"recommendations": popular}
