@@ -5,7 +5,7 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from read import (
+from .read import (
     fetch_movies,
     fetch_movie_by_id,
     fetch_user_ratings,
@@ -16,6 +16,12 @@ from read import (
 
 
 app = FastAPI()
+
+
+@app.get("/")
+async def get():
+    return {""}
+
 
 @app.get("/movies")
 async def get_movies():
