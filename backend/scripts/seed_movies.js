@@ -38,18 +38,32 @@ var movies = [];
 async function get_movies() {
     try {
         const res = await axios.request(options);
-        const result = res.data;
-        const n = result['results'].length;
+        const result = res.data['results'];
+        const n = result.length;
         for (let i = 0; i < n; i++) {
-            
+
+            //recuperer les keywords
+            let movie_keywords = '';
+            try {
+              const res2 = await axios.request(get_keyword_options(result[i]['id']));
+              const result2 = res2.data['keywords'];
+              const p = result2.length;
+              for (let i = 0; i < p; i++) {
+                movie_keywords += result2[i]['name'] + ' ';
+              }
+            } catch (err) {
+              console.error(`Erreur lors de la récupération des keywords pour ${result[i]['title']} :`, err.message);
+            }
+
+            //ajout de tous les attributs de movie
             movies.push({
-                id : result['results'][i]['id'],
-                title : result['results'][i]['title'],
-                date : result['results'][i]['release_date'],
-                genre: result['results'][i]['genre_ids'],
-                description: result['results'][i]['overview'],
-                keywords:'',
-                poster_path : 'https://image.tmdb.org/t/p/w500' + result['results'][i]['poster_path']
+                id : result[i]['id'],
+                title : result[i]['title'],
+                date : result[i]['release_date'],
+                genre: result[i]['genre_ids'],
+                description: result[i]['overview'],
+                keywords:movie_keywords,
+                poster_path : 'https://image.tmdb.org/t/p/w500' + result[i]['poster_path']
             });
         }
     } catch (err) {
@@ -66,16 +80,7 @@ async function seed() {
     
 
     //appel a l'api pour modifier keywords
-    try {
-      const res = await axios.request(get_keyword_options(movie.id));
-      const result = res.data;
-      const n = result['keywords'].length;
-      for (let i = 0; i < n; i++) {
-        movie.keywords += result['keywords'][i]['name'] + ' ';
-      }
-    } catch (err) {
-      console.error(`Erreur lors de la récupération des keywords pour ${movie.title} :`, err.message);
-    }
+    
 
 
     if (is_in_db){
@@ -112,7 +117,6 @@ async function seed() {
 
 async function main() {
     await appDataSource.initialize();
-    //const genre_dico = await getAllGenre();
     await get_movies();
     await seed();
     await appDataSource.destroy();
