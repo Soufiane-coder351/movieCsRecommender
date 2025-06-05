@@ -1,17 +1,16 @@
 import typeorm from 'typeorm';
-
 const Rating = new typeorm.EntitySchema({
   name: 'Rating',
   columns: {
     userId: {
       type: Number,
-      primary: true,
       nullable: false,
+      primary: true, 
     },
     movieId: {
       type: Number,
-      primary: true,
       nullable: false,
+        primary: true, 
     },
     ratingValue: {
       type: Number,
@@ -30,8 +29,7 @@ const Rating = new typeorm.EntitySchema({
       type: 'many-to-one',
       joinColumn: { name: 'movieId' },
       cascade: true,
-    },
-  },
+    },
+  },
 });
-
 export default Rating;

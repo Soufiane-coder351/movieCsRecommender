@@ -1,5 +1,4 @@
 import typeorm from 'typeorm';
-
 const Movie = new typeorm.EntitySchema({
   name: 'Movie',
   columns: {
@@ -8,24 +7,14 @@ const Movie = new typeorm.EntitySchema({
       type: Number,
       generated: true,
     },
-    title: {
-      type: String,
+    title: { type: String,
+        unique: true  // Ensuring movie titles are unique
     },
-    date: {
-      type: String,
-    },
-    genre: {
-        type: 'simple-json'
-        //genre est une liste d'ids de genres, 
-        //dont on stocke un tableau de relation hors de la base de données
-    },
-    description: {
-        type: String
-    },
-    poster_path: {
-      type: String,
-    },
+    description: { type: String },
+    releaseDate: { type: Date },
+    genre: { type: String },
+    director: { type: String },
+     rating: { type: Number },
   },
 });
-
 export default Movie;
