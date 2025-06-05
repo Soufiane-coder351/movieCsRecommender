@@ -15,17 +15,17 @@ const options = {
 
 var movies = [];
 
-async function getAllGenre() {
-  const genreRepository = appDataSource.getRepository(Genre);
-  const genres = await genreRepository.find({ select: ['id', 'name'] });
-  const genre_dico = {};
-  for (const genre of genres) {
-    genre_dico[genre.id] = genre.name;
-  }
-  return genre_dico;
-}
+// async function getAllGenre() {
+//   const genreRepository = appDataSource.getRepository(Genre);
+//   const genres = await genreRepository.find({ select: ['id', 'name'] });
+//   const genre_dico = {};
+//   for (const genre of genres) {
+//     genre_dico[genre.id] = genre.name;
+//   }
+//   return genre_dico;
+// }
 
-async function get_movies(genre_dico) {
+async function get_movies() {
     try {
         const res = await axios.request(options);
         const result = res.data;
@@ -60,8 +60,8 @@ async function seed() {
 
 async function main() {
     await appDataSource.initialize();
-    const genre_dico = await getAllGenre();
-    await get_movies(genre_dico);
+    //const genre_dico = await getAllGenre();
+    await get_movies();
     await seed();
     await appDataSource.destroy();
 }
