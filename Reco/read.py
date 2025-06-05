@@ -15,7 +15,7 @@ async def get_movies():
     cursor.execute("SELECT * FROM Movie")
     movies = [dict(row) for row in cursor.fetchall()]  # Conversion des résultats en liste de dictionnaires
     conn.close()
-    return {"movies": movies}
+    return movies
 
 # Route pour récupérer un film par son id
 @app.get("/movie/{movie_id}")
@@ -27,7 +27,7 @@ async def get_movie(movie_id: int):
     row = cursor.fetchone()
     conn.close()
     if row:
-        return {"movie": dict(row)}
+        return  dict(row)
     else:
         return {"error": f"Movie with id {movie_id} not found"}
 
@@ -46,7 +46,7 @@ async def get_user_ratings(user_id: int):
     """, (user_id,))
     results = [dict(row) for row in cursor.fetchall()]
     conn.close()
-    return {"user_id": user_id, "rated_movies": results}
+    return results
 
 
 # Route pour obtenir la note moyenne d'un film
@@ -58,6 +58,23 @@ async def get_average_rating(movie_id: int):
     avg = cursor.fetchone()[0]
     conn.close()
     if avg is not None:
-        return {"movie_id": movie_id, "average_rating": avg}
-    else:
-        return {"error": f"No ratings found for movie id {movie_id}"}
+        return avg
+    
+
+# Route pour récupérer les films les mieux notés
+@app.get("/top_rated_movies")
+async def get_top_rated_movies(limit: int = 10):
+    conn = sqlite3.connect(DATABASE_PATH)
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT Movie.*, AVG(Rating.ratingValue) as average_rating
+        FROM Movie
+        JOIN Rating ON Movie.id = Rating.movieId
+        GROUP BY Movie.id
+        ORDER BY average_rating DESC
+        LIMIT ?
+    """, (limit,))
+    results = [dict(row) for row in cursor.fetchall()]
+    conn.close()
+    return [movie["id"] for movie in results]

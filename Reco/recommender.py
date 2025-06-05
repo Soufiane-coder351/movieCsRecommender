@@ -4,13 +4,14 @@ import pandas as pd
 import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+from typing import List
 
 @read.app.get("/recommendations/{user_id}")
 async def get_recommendations(
     user_id: int,
     n_recommendations: int = 10,
     recent_weight_factor: float = 2.0
-):
+) -> List[int]:
     """
     Recommande des films à un utilisateur selon la similarité de contenu,
     en donnant plus de poids aux notes récentes.
@@ -24,32 +25,43 @@ async def get_recommendations(
     movies=read.get_movies()
     if not movies:
         conn.close()
-        return {"recommendations": []}
+        return []
     
+     # Charger la table des genres pour faire la correspondance id -> nom
+    cursor.execute("SELECT id, name FROM genre")
+    genre_rows = cursor.fetchall()
+    genre_map = {str(row["id"]): row["name"] for row in genre_rows}
 
-    #Préparer le DataFrame des films avec un champ texte combiné
+    # Préparer le DataFrame des films 
     movies_df = pd.DataFrame(movies)
+
+    # Fonction pour convertir les IDs de genres en noms
+    def genres_ids_to_names(genre_ids):
+        if isinstance(genre_ids, list):
+            ids = genre_ids
+        elif isinstance(genre_ids, str):
+            ids = [g.strip() for g in genre_ids.split(",") if g.strip()]
+        else:
+            return ""
+        return " ".join([genre_map.get(str(gid), "") for gid in ids if str(gid) in genre_map])
+ 
+    
+    # Remplacer la colonne genre par les noms pour le texte combiné
+    movies_df["genre_names"] = movies_df["genre"].apply(genres_ids_to_names)
+    
+    # Préparer le DataFrame des films avec un champ texte combiné
     movies_df["combined_text"] = (
         movies_df["title"].fillna('') + " " +
         movies_df.get("description", pd.Series(['']*len(movies_df))).fillna('') + " " +
-        movies_df.get("genre", pd.Series(['']*len(movies_df))).fillna('')
+        movies_df.get("genre_names", pd.Series(['']*len(movies_df))).fillna('')
     )
 
     # Charger les notes de l'utilisateur
     user_ratings = read.get_user_ratings(user_id)
     if not user_ratings:
         # Si pas de notes, recommander les films les mieux notés globalement
-        cursor.execute("""
-            SELECT Movie.id, AVG(Rating.ratingValue) as avg_rating
-             FROM Movie
-             JOIN Rating ON Movie.id = Rating.movieId
-            GROUP BY Movie.id
-            ORDER BY avg_rating DESC
-            LIMIT ?
-        """, (n_recommendations,))
-        popular = [row["id"] for row in cursor.fetchall()]
         conn.close()
-        return {"recommendations": popular}
+        return  read.get_top_rated_movies(n_recommendations)
 
     #  Préparer le DataFrame des notes utilisateur
     user_ratings_df = pd.DataFrame(user_ratings)
@@ -87,4 +99,4 @@ async def get_recommendations(
 
     conn.close()
     # Retourne la liste des IDs recommandés
-    return {"recommendations": recommendations["id"].tolist()}
+    return  recommendations["id"].tolist()
