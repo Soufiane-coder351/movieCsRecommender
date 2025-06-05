@@ -1,14 +1,27 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import heroBg from "../assets/hero_background.png";
-
 
 const Login = () => {
   const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    console.log("Logging in with email:", email);
-    // Add your login logic here
+    setError("");
+    try {
+      // Send login request to backend
+      const res = await axios.post("http://localhost:8000/users/login", { email });
+      const userId = res.data.id;
+      // Store userId in localStorage
+      localStorage.setItem("userId", userId);
+      // Redirect to home page
+      window.location.href = "/";
+    } catch (err) {
+      setError("Login failed. Please check your email.");
+    }
   };
 
   return (
@@ -28,6 +41,7 @@ const Login = () => {
               placeholder="you@example.com"
             />
           </div>
+          {error && <div className="text-red-400">{error}</div>}
           <button
             type="submit"
             className="w-full py-3 bg-orange-500 rounded hover:bg-orange-600 transition"
