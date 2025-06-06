@@ -54,9 +54,9 @@ const ProfilePage = () => {
           <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between">
             <div>
               <h1 className="text-4xl md:text-5xl font-bold drop-shadow-md mb-2">
-                {user.name}
+                Hello, {user.name}
               </h1>
-              <p className="text-lg text-gray-300">{user.email}</p>
+              <p className="text-lg text-gray-300">email: {user.email}</p>
             </div>
           </div>
         </div>
