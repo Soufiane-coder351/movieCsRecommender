@@ -17,6 +17,32 @@ router.get('/', function (req, res) {
         });
 });
 
+// Get multiple genres by IDs
+router.get('/multiple/:genreIds', function (req, res) {
+    const genreIds = req.params.genreIds.split(',').map(id => parseInt(id, 10));
+    
+    appDataSource
+        .getRepository(Genre)
+        .find({
+            where: {
+                id: In(genreIds)
+            }
+        })
+        .then(function (genres) {
+            if (genres.length > 0) {
+                //return an array of genres names
+                genres = genres.map(genre => genre.name); // Extract names from the Genre objects
+                // Set the status before sending the response
+                res.status(200).json({ genres: genres });
+            } else {
+                res.status(404).json({ message: 'No genres found for the given IDs' });
+            }
+        })
+        .catch(function () {
+            res.status(500).json({ message: 'Error while fetching genres' });
+        });
+});
+
 
 router.get('/multiple', function (req, res) {
     //return all genres
