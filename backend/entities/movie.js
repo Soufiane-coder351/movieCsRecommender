@@ -23,7 +23,7 @@ const Movie = new typeorm.EntitySchema({
         type: String
     },
     keywords: {
-      type: String
+      type: 'simple-json'
     },
     actors: {
       type: 'simple-json'
