@@ -41,10 +41,16 @@ const MoviePage = () => {
     return <Navigate to="/notfound" replace />;
   }
 
-  // Parse keywords (comma separated string), show only first 10
-  const keywords = movie.keywords
-    ? movie.keywords.split(" ").map((k) => k.trim()).filter(Boolean).slice(0, 10)
-    : [];
+  // Parse keywords (stringified array), show only first 10
+  let keywords = [];
+  try {
+    keywords = Array.isArray(movie.keywords)
+      ? movie.keywords
+      : JSON.parse(movie.keywords || "[]");
+    keywords = keywords.map((k) => k.trim()).filter(Boolean).slice(0, 10);
+  } catch {
+    keywords = [];
+  }
 
   return (
     <div

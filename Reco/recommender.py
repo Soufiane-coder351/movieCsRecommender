@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-from .read import (
+from read import (
     fetch_movies,
     fetch_movie_by_id,
     fetch_user_ratings,
@@ -100,11 +100,25 @@ async def get_recommendations(user_id: int, n_recommendations: int = 20):
                 return ""
         return " ".join([genre_map.get(gid, "") for gid in genre_ids if gid in genre_map])
     
+    def keywords_to_text(keywords):
+        if not keywords:
+            return ""
+        if isinstance(keywords, str):
+            try:
+                keywords = ast.literal_eval(keywords)
+            except Exception:
+                return ""
+        return " ".join([str(k) for k in keywords if k])
+
+
+
     movies_df["genre_names"] = movies_df["genre"].apply(genres_ids_to_names)
+    movies_df["keywords_text"] = movies_df["keywords"].apply(keywords_to_text)
     movies_df["combined_text"] = (
         movies_df["title"].fillna("") + " " +
         movies_df.get("description", pd.Series([""] * len(movies_df))).fillna("") + " " +
-        movies_df.get("genre_names", pd.Series([""] * len(movies_df))).fillna("")
+        movies_df.get("genre_names", pd.Series([""] * len(movies_df))).fillna("") + " " +
+        movies_df.get("keywords_text", pd.Series([""] * len(movies_df))).fillna("")
     )
 
     user_ratings_df = pd.DataFrame(user_ratings)
