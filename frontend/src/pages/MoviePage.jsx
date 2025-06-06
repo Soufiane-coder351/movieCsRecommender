@@ -1,18 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Navigate } from "react-router-dom";
+import { useParams, Navigate, useNavigate } from "react-router-dom";
 import axios from "axios";
 import heroBg from "../assets/hero_background.png";
 import useFetchMovie from "../scripts/useFetchMovie";
 import useFetchGenres from "../scripts/useFetchGenres";
+import useMovieReactions from "../scripts/useMovieReactions";
 
 const MoviePage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { movie, error } = useFetchMovie(id);
-  const userId = localStorage.getItem("userId");
 
-  // null = no reaction, "like" = liked, "dislike" = disliked
+  const userId = localStorage.getItem("userId");
   const [userReaction, setUserReaction] = useState(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+
   const genreNames = useFetchGenres(movie?.genre || []).genres || [];
+  const { likes, dislikes } = useMovieReactions(id, refreshKey);
 
   // Fetch user's rating for this movie on load
   useEffect(() => {
@@ -31,13 +35,11 @@ const MoviePage = () => {
   const handleLike = async () => {
     if (!userId) return;
     if (userReaction === "like") {
-      // Remove like
       await axios.delete("http://localhost:3000/ratings", {
         data: { userId: Number(userId), movieId: Number(id) },
       });
       setUserReaction(null);
     } else {
-      // Like (and remove dislike if present)
       await axios.post("http://localhost:3000/ratings", {
         userId: Number(userId),
         movieId: Number(id),
@@ -45,19 +47,18 @@ const MoviePage = () => {
       });
       setUserReaction("like");
     }
+    setRefreshKey((k) => k + 1); // Refresh counts
   };
 
   // Dislike handler
   const handleDislike = async () => {
     if (!userId) return;
     if (userReaction === "dislike") {
-      // Remove dislike
       await axios.delete("http://localhost:3000/ratings", {
         data: { userId: Number(userId), movieId: Number(id) },
       });
       setUserReaction(null);
     } else {
-      // Dislike (and remove like if present)
       await axios.post("http://localhost:3000/ratings", {
         userId: Number(userId),
         movieId: Number(id),
@@ -65,12 +66,17 @@ const MoviePage = () => {
       });
       setUserReaction("dislike");
     }
+    setRefreshKey((k) => k + 1); // Refresh counts
   };
 
-  // Redirect to NotFound if error or no movie found
   if (error || !movie) {
     return <Navigate to="/notfound" replace />;
   }
+
+  // Parse keywords (comma separated string), show only first 10
+  const keywords = movie.keywords
+    ? movie.keywords.split(" ").map((k) => k.trim()).filter(Boolean).slice(0, 10)
+    : [];
 
   return (
     <div
@@ -112,28 +118,40 @@ const MoviePage = () => {
                 )}
               </div>
 
-              {/* Date and Rating */}
+              {/* Likes/Dislikes badges */}
               <div className="flex flex-wrap gap-3 text-sm font-medium mt-2">
+                <span className="bg-[#223355] px-3 py-1 rounded-full flex items-center gap-1">
+                  👍 {likes}
+                </span>
+                <span className="bg-[#223355] px-3 py-1 rounded-full flex items-center gap-1">
+                  👎 {dislikes}
+                </span>
                 <span className="bg-[#223355] px-3 py-1 rounded-full">
                   {movie.date || movie.year}
                 </span>
-                <span className="bg-[#223355] px-3 py-1 rounded-full text-yellow-300">
-                  ⭐ {movie.imdbRating || "9"} / 10
-                </span>
               </div>
 
-              <p>
-                <span className="font-semibold">Director:</span> {movie.director || "Unknown"}
-              </p>
-              <p>
-                <span className="font-semibold">Main Actors:</span>{" "}
-                {Array.isArray(movie.actors)
-                  ? movie.actors.join(", ")
-                  : movie.actors || "Unknown"}
-              </p>
-              <p>
-                <span className="font-semibold">Release Date:</span> {movie.releaseDate || movie.date}
-              </p>
+              {/* Description */}
+              {movie.description && (
+                <div className="mt-2">
+                  <h2 className="text-lg font-semibold mb-1 text-orange-400">Description</h2>
+                  <p className="text-base text-gray-200">{movie.description}</p>
+                </div>
+              )}
+
+              {/* Keywords */}
+              {keywords.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {keywords.map((kw, idx) => (
+                    <span
+                      key={idx}
+                      className="bg-[#223355] text-orange-300 px-2 py-1 rounded-full text-xs font-medium"
+                    >
+                      #{kw}
+                    </span>
+                  ))}
+                </div>
+              )}
 
               {movie.imdbLink && (
                 <a
@@ -167,13 +185,15 @@ const MoviePage = () => {
                 </button>
               </div>
 
-              {/* Back */}
-              {/* <button
-                onClick={() => window.history.back()}
+              {/* Home Button */}
+              <button
+                onClick={() => {
+                  window.location.href = "/";
+                }}
                 className="mt-6 px-5 py-2 border border-[#223355] rounded-lg hover:bg-orange-500 transition w-max font-semibold"
               >
-                ← Back
-              </button> */}
+                ← Home
+              </button>
             </div>
           </div>
         </div>

@@ -56,6 +56,16 @@ router.get("/disliked/:userId", async (req, res) => {
   res.json({ movies: ratings.map(r => r.movie) });
 });
 
+// GET /ratings/counts/:movieId - Get like/dislike counts for a movie
+router.get("/counts/:movieId", async (req, res) => {
+  const movieId = Number(req.params.movieId);
+  if (isNaN(movieId)) return res.status(400).json({ error: "Invalid movieId" });
+  const ratingRepo = appDataSource.getRepository(Rating);
+  const likes = await ratingRepo.count({ where: { movieId, ratingValue: 1 } });
+  const dislikes = await ratingRepo.count({ where: { movieId, ratingValue: -1 } });
+  res.json({ likes, dislikes });
+});
+
 // GET /ratings/:userId/:movieId - Get user's rating for a movie
 router.get("/:userId/:movieId", async (req, res) => {
   const userId = Number(req.params.userId);
@@ -67,5 +77,7 @@ router.get("/:userId/:movieId", async (req, res) => {
   const rating = await ratingRepo.findOne({ where: { userId, movieId } });
   res.json({ rating: rating ? rating.ratingValue : 0 });
 });
+
+
 
 export default router;

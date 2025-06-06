@@ -71,7 +71,7 @@ async def get_top_rated_movies(limit: int = 10):
 
 
 @app.get("/recommendations/{user_id}")
-async def get_recommendations(user_id: int, n_recommendations: int = 10, recent_weight_factor: float = 2.0):
+async def get_recommendations(user_id: int, n_recommendations: int = 20):
     movies = fetch_movies()
     if not movies:
         return {"recommendations": []}
