@@ -12,6 +12,9 @@ const options = {
   }
 };
 
+
+//les keywords ne sont pas disponibles lors de l'appel movie/popular, 
+//donc on doit appeler l'api pour chaque film
 function get_keyword_options (movie_id){
   return {method: 'GET',
   url: `https://api.themoviedb.org/3/movie/${movie_id}/keywords`,
@@ -22,18 +25,8 @@ function get_keyword_options (movie_id){
 }
 };
 
-
+//nos films qu'on ajoutera à notre database
 var movies = [];
-
-// async function getAllGenre() {
-//   const genreRepository = appDataSource.getRepository(Genre);
-//   const genres = await genreRepository.find({ select: ['id', 'name'] });
-//   const genre_dico = {};
-//   for (const genre of genres) {
-//     genre_dico[genre.id] = genre.name;
-//   }
-//   return genre_dico;
-// }
 
 async function get_movies() {
     try {
@@ -42,7 +35,7 @@ async function get_movies() {
         const n = result.length;
         for (let i = 0; i < n; i++) {
 
-            //recuperer les keywords
+            //appel à l'api pour recuperer les keywords
             let movie_keywords = '';
             try {
               const res2 = await axios.request(get_keyword_options(result[i]['id']));
@@ -77,14 +70,9 @@ async function seed() {
   for (const movie of movies) {
     const is_in_db = await movieRepository.findOneBy({ id: movie.id });
 
-    
-
-    //appel a l'api pour modifier keywords
-    
-
 
     if (is_in_db){
-      
+      //si le film est deja dans la db, on met à jour ses attributs
       try {
         await movieRepository.update(
           { id: movie.id },
@@ -102,6 +90,8 @@ async function seed() {
         console.error(`Erreur de mise à jour pour ${movie.title} :`, err.message);
       }
     }
+
+    //sinon on l'ajoute
     else {
       try {
         await movieRepository.insert(movie);
