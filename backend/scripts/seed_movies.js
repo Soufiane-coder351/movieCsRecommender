@@ -45,13 +45,13 @@ async function get_movies(page_number) {
         for (let i = 0; i < n; i++) {
 
             //recuperer les keywords
-            let movie_keywords = '';
+            let movie_keywords = [];
             try {
               const res2 = await axios.request(get_keyword_options(result[i]['id']));
               const result2 = res2.data['keywords'];
               const p = result2.length;
               for (let i = 0; i < p; i++) {
-                movie_keywords += result2[i]['name'] + ' ';
+                movie_keywords.push(result2[i]['name']);
               }
             } catch (err) {
               console.error(`Erreur lors de la récupération des keywords pour ${result[i]['title']} :`, err.message);
