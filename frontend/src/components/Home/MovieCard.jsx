@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link } from 'react-router-dom';
-import useFetchGenre from '../scripts/useFetchGenre';
+import React from "react";
+import { Link } from "react-router-dom";
+import useFetchGenre from "../../scripts/useFetchGenre";
 
 const MovieCard = ({ movie }) => {
   const firstGenre = useFetchGenre(movie.genre[0]).genre;
@@ -16,7 +16,9 @@ const MovieCard = ({ movie }) => {
       />
       <div className="p-3 flex flex-col flex-1">
         <h3 className="font-semibold text-lg">{movie.title}</h3>
-        <p className="text-sm text-gray-300 mt-auto">{firstGenre} • {movie.date}</p>
+        <p className="text-sm text-gray-300 mt-auto">
+          {firstGenre} • {movie.date}
+        </p>
       </div>
     </Link>
   );

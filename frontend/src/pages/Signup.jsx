@@ -19,7 +19,7 @@ const Signup = () => {
       // Store userId in localStorage
       localStorage.setItem("userId", userId);
       // Redirect to home page
-      navigate("/");
+      window.location.href = "/";
     } catch (err) {
       setError("Signup failed. Please try again.");
     }
