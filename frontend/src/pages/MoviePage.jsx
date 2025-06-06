@@ -14,6 +14,8 @@ import MovieDescription from "../components/Movie/MovieDescription";
 import MovieKeywords from "../components/Movie/MovieKeywords";
 import LikeDislikeButtons from "../components/Movie/LikeDislikeButtons";
 import BackToHomeButton from "../components/Movie/BackToHomeButton";
+import MovieActors from "../components/Movie/MovieActors";
+
 
 const MoviePage = () => {
   const { id } = useParams();
@@ -57,6 +59,7 @@ const MoviePage = () => {
             <div className="md:w-2/3 p-6 flex flex-col gap-4">
               <h1 className="text-4xl font-extrabold tracking-tight">{movie.title}</h1>
               <MovieGenres genres={genreNames} />
+              <MovieActors actors={Array.isArray(movie.actors) ? movie.actors : JSON.parse(movie.actors || "[]")} />
               <MovieBadges likes={likes} dislikes={dislikes} date={movie.date || movie.year} />
               <MovieDescription description={movie.description} />
               <MovieKeywords keywords={keywords} />
