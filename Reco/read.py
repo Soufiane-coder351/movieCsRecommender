@@ -1,6 +1,8 @@
 import sqlite3
+import os
 
-DATABASE_PATH = "../backend/database.sqlite3"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE_PATH = os.path.join(BASE_DIR, "../backend/database.sqlite3")
 
 def fetch_movies():
     conn = sqlite3.connect(DATABASE_PATH)
