@@ -44,33 +44,22 @@ def fetch_average_rating(movie_id: int):
     conn.close()
     return avg
 
-def fetch_top_rated_movies(limit: int = 10):
+
+def fetch_top_rated_movies():
     conn = sqlite3.connect(DATABASE_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
+    # Get all movies and sum of their ratings (0 if no ratings), no limit
     cursor.execute("""
-        SELECT Movie.id, AVG(Rating.ratingValue) as avg_rating
+        SELECT Movie.id, COALESCE(SUM(Rating.ratingValue), 0) as sum_rating
         FROM Movie
-        JOIN Rating ON Movie.id = Rating.movieId
+        LEFT JOIN Rating ON Movie.id = Rating.movieId
         GROUP BY Movie.id
-        HAVING avg_rating > 0
-        ORDER BY avg_rating DESC
-        LIMIT ?
-    """, (limit,))
-    rated_movies = [row["id"] for row in cursor.fetchall()]
-    if len(rated_movies) < limit:
-        cursor.execute("""
-            SELECT Movie.id
-            FROM Movie
-            LEFT JOIN Rating ON Movie.id = Rating.movieId
-            WHERE Rating.movieId IS NULL
-            LIMIT ?
-        """, (limit - len(rated_movies),))
-        unrated_movies = [row["id"] for row in cursor.fetchall()]
-        rated_movies.extend(unrated_movies)
-
+        ORDER BY sum_rating DESC
+    """)
+    movies = [row["id"] for row in cursor.fetchall()]
     conn.close()
-    return rated_movies
+    return movies
 
 def fetch_genres():
     import sqlite3

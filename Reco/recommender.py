@@ -63,8 +63,8 @@ async def get_average_rating_route(movie_id: int):
 
 
 @app.get("/top_rated_movies")
-async def get_top_rated_movies(limit: int = 10):
-    movies = fetch_top_rated_movies(limit)
+async def get_top_rated_movies():
+    movies = fetch_top_rated_movies()
     return {"top_rated_movies": movies}
 
 
@@ -84,7 +84,7 @@ async def get_recommendations(user_id: int, n_recommendations: int = 20):
 
     user_ratings = fetch_user_ratings(user_id)
     if not user_ratings:
-        return {"fromwhere":"came from fetch top rated movies","recommendations": fetch_top_rated_movies(n_recommendations)}
+        return {"fromwhere":"came from fetch top rated movies","recommendations": fetch_top_rated_movies()}
 
 
     genre_rows = fetch_genres()  # <-- Utilise la fonction ici
