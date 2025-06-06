@@ -75,6 +75,10 @@ async def get_recommendations(user_id: int, n_recommendations: int = 20):
     movies = fetch_movies()
     if not movies:
         return {"recommendations": []}
+    
+    # Set n_recommendations to the number of movies in the database
+    n_recommendations = len(movies)
+
 
     movies_df = pd.DataFrame(movies)  
 

@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom dark scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  background: #18243a;
+}
+::-webkit-scrollbar-thumb {
+  background: #223355;
+  border-radius: 6px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #334466;
+}
